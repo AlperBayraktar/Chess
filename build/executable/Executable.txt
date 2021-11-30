@@ -1,0 +1,2 @@
+.exe will be here when building the project.
+Do not forget to put .dll files of SDL and SDL_image to here.

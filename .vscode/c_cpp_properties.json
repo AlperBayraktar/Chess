@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": [
+        "${workspaceFolder}/**",
+
+        // Folder that contains SDL.h
+        "C:/cpp/SDL2-2.0.16/x86_64-w64-mingw32/include/SDL2",
+        // Folder that contains SDL_image.h
+        "C:/cpp/SDL2_image-2.0.5/x86_64-w64-mingw32/include/SDL2"
+      ],
+      "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+      "windowsSdkVersion": "10.0.19041.0",
+      "compilerPath": "C:/MinGW/bin/g++.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "${default}"
+    }
+  ],
+  "version": 4
+}
