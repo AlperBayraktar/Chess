@@ -1,9 +1,12 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <vector>
 
 #include "Log.h"
 #include "Square.h"
 #include "ChessPiece.h"
+#include "Colors.h"
+#include "BoardUtilities.h"
 
 
 // Returns image texture of given filename
@@ -14,42 +17,19 @@ SDL_Texture* GetImageTexture(std::string filename, SDL_Renderer* renderer)
     return IMG_LoadTexture(renderer, path.c_str());
 }
 
+// An hash function that return string int int format
+constexpr unsigned int hash(const char *s, int off = 0) {                        
+    return !s[off] ? 5381 : (hash(s, off+1)*33) ^ s[off];                           
+}
+
 
 int main(int argc, char* argv[])
 {
     //===========================================
-    // Variables
+    // Constant variables
     const int ROW_COUNT = 8;
     const int COL_COUNT = 8;
-
-    SDL_Color BLACK = { 168, 108, 59, 255 };
-    SDL_Color WHITE = { 255, 255, 255, 1 };
     // ===========================================
-
-    // ===========================================
-    // Board
-
-    Square Squares[ROW_COUNT][COL_COUNT];
-
-    const char* currentColor = "WHITE";
-
-    for (int row=0; row<ROW_COUNT; row++)
-    {
-        for (int col=0; col<COL_COUNT; col++)
-        {
-            // Get square
-            Square& square = Squares[row][col];
-            // Set grid position and bg color
-            square.SetGridPosition(row, col);
-            currentColor == "BLACK" ? square.backgroundColor = BLACK : square.backgroundColor = WHITE;
-
-            // Update currentColor
-            currentColor == "BLACK" ? currentColor = "WHITE" : currentColor = "BLACK";
-        }
-        currentColor == "BLACK" ? currentColor = "WHITE" : currentColor = "BLACK";
-    }
-    // =========================================== 
-
 
     // ===========================================
     // Display
@@ -108,12 +88,22 @@ int main(int argc, char* argv[])
         {   ROOK_WHITE,   KNIGHT_WHITE,  BISHOP_WHITE,  QUEEN_WHITE,  KING_WHITE,  BISHOP_WHITE,  KNIGHT_WHITE,  ROOK_WHITE   }
     };
 
+    Square Squares[ROW_COUNT][COL_COUNT];
+
     for (int row=0; row<ROW_COUNT; row++)
     {
         for (int col=0; col<COL_COUNT; col++)
         {
-            Square& square = Squares[row][col];
-            square.Piece = &Grid[row][col];
+            Square* square = &Squares[row][col];
+            // Set grid position
+            square->SetGridPosition(row, col);
+
+            // Set bg color
+            ResetSquareBg(square);
+
+            // Render
+            square->piece = &Grid[row][col];
+            square->Render(renderer);
         }
     }
     // ===========================================
@@ -124,16 +114,11 @@ int main(int argc, char* argv[])
     // Game loop
 
     SDL_Event evt;
-
-    for (int row=0; row<ROW_COUNT; row++)
-    {
-        for (int col=0; col<COL_COUNT; col++)
-        {
-            Square& square = Squares[row][col];
-            square.Render(renderer);
-        }
-    }
-    SDL_RenderPresent(renderer);
+    
+    const char* turn = "WHITE";
+    Square* selectedSquare = nullptr;
+    std::vector<Square*> moveableSquares;
+    std::vector<Square*> takeableSquares;
 
     while (true)
     {
@@ -144,6 +129,111 @@ int main(int argc, char* argv[])
                 // Close the game
                 case SDL_QUIT:  
                     return 0;
+                
+                case SDL_MOUSEBUTTONDOWN:
+                    if (evt.button.button == SDL_BUTTON_LEFT)
+                    {
+                        // Get clicked square
+                        int mouseX, mouseY;
+                        SDL_GetMouseState(&mouseX, &mouseY);
+
+                        int row = mouseY / Square::HEIGHT;
+                        int col = mouseX / Square::WIDTH;
+
+                        Square* clickedSquare = &Squares[row][col];
+
+
+                        // Select
+                        if (!selectedSquare && clickedSquare->piece->type != "EMPTY" && clickedSquare->piece->color == turn)
+                        {
+                            // Set moveable and takeable squares
+                            switch (hash(clickedSquare->piece->type))
+                            {
+                                case hash("PAWN"):
+                                    if (clickedSquare->piece->color == "WHITE")
+                                    {
+                                        MakeMoveableIfEmpty(&Squares[clickedSquare->row - 1][clickedSquare->col], &moveableSquares);
+
+                                        if (clickedSquare->row == 6)
+                                        {
+                                            MakeMoveableIfEmpty(&Squares[6 - 2][clickedSquare->col], &moveableSquares);
+                                        }
+                                        
+                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row - 1][clickedSquare->col - 1], &takeableSquares, turn);
+                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row - 1][clickedSquare->col + 1], &takeableSquares, turn);
+                                    }
+
+                                    else if (clickedSquare->piece->color == "BLACK")
+                                    {
+                                        MakeMoveableIfEmpty(&Squares[clickedSquare->row + 1][clickedSquare->col], &moveableSquares);
+
+                                        if (clickedSquare->row == 1)
+                                        {
+                                            MakeMoveableIfEmpty(&Squares[1 + 2][clickedSquare->col], &moveableSquares);
+                                        }
+
+                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row + 1][clickedSquare->col - 1], &takeableSquares, turn);
+                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row + 1][clickedSquare->col + 1], &takeableSquares, turn);
+                                    }
+                            }
+
+                            for (Square* takeableSquare : takeableSquares)
+                            {
+                                takeableSquare->backgroundColor = RED;
+                                takeableSquare->Render(renderer);
+                            }
+                            
+                            for (Square* moveableSquare : moveableSquares)
+                            {
+                                moveableSquare->backgroundColor = GREEN;
+                                moveableSquare->Render(renderer);
+                            }
+
+                            clickedSquare->backgroundColor = BLUE;
+                            clickedSquare->Render(renderer);
+                            selectedSquare = clickedSquare;
+                            break;
+                        }
+
+                        // Deselect
+                        if (selectedSquare && selectedSquare->row == clickedSquare->row && selectedSquare->col == clickedSquare->col)
+                        {
+                            DeselectSquare(&takeableSquares, &moveableSquares, renderer, selectedSquare);
+                            selectedSquare = nullptr;
+                            break;
+                        }
+
+                        // Move
+                        if (selectedSquare)
+                        {
+                            // Combine moveableSquares and takeableSquares into one vector
+                            std::vector<Square*> allMoveableSquares;
+
+                            for (Square* moveableSquare : moveableSquares)
+                            {
+                                allMoveableSquares.push_back(moveableSquare);
+                            }
+
+                            for (Square* takeableSquare : takeableSquares)
+                            {
+                                allMoveableSquares.push_back(takeableSquare);
+                            }
+
+                            for (Square* moveableSquare : allMoveableSquares)
+                            {
+                                if (moveableSquare->row == clickedSquare->row && moveableSquare->col == clickedSquare->col)
+                                {
+                                    clickedSquare->piece = selectedSquare->piece;
+                                    selectedSquare->piece = &EMPTY;                                
+                                    DeselectSquare(&takeableSquares, &moveableSquares, renderer, selectedSquare);
+                                    selectedSquare = nullptr;    
+
+                                    turn = turn == "WHITE" ? "BLACK" : "WHITE";
+                                    break;
+                                }
+                            }
+                        }
+                    }
             }
         }
     }

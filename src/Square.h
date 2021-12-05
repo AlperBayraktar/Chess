@@ -9,7 +9,7 @@ struct Square{
     
     SDL_Rect rect;
     SDL_Color backgroundColor;
-    ChessPiece* Piece = nullptr;
+    ChessPiece* piece = nullptr;
     
     Square();
     void SetGridPosition(int row_, int col_);

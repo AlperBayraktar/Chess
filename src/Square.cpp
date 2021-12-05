@@ -18,5 +18,6 @@ void Square::Render(SDL_Renderer* renderer)
     SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     SDL_RenderFillRect(renderer, &rect);
     SDL_RenderDrawRect(renderer, &rect);
-    SDL_RenderCopy(renderer, Piece->ImageTexture, NULL, &rect);
+    SDL_RenderCopy(renderer, piece->imageTexture, NULL, &rect);
+    SDL_RenderPresent(renderer);
 }

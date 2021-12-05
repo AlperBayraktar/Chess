@@ -3,20 +3,20 @@
 #include "Log.h"
 
 struct ChessPiece{
-    SDL_Texture* ImageTexture = nullptr;
-    const char* Color;
-    const char* Type;
+    SDL_Texture* imageTexture = nullptr;
+    const char* color;
+    const char* type;
 
     ChessPiece(){}
     ChessPiece(
-        SDL_Texture* Texture_,
-        const char* Color_,
-        const char* Type_
-    ) : ImageTexture(Texture_), Color(Color_), Type(Type_) {}
+        SDL_Texture* texture,
+        const char* color_,
+        const char* type_
+    ) : imageTexture(texture), color(color_), type(type_) {}
 
     ~ChessPiece()
     {
-        SDL_DestroyTexture(ImageTexture);
+        SDL_DestroyTexture(imageTexture);
     }
 
 };
