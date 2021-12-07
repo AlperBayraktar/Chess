@@ -142,7 +142,6 @@ int main(int argc, char* argv[])
 
                         Square* clickedSquare = &Squares[row][col];
 
-
                         // Select
                         if (!selectedSquare && clickedSquare->piece->type != "EMPTY" && clickedSquare->piece->color == turn)
                         {
@@ -158,9 +157,12 @@ int main(int argc, char* argv[])
                                         {
                                             MakeMoveableIfEmpty(&Squares[6 - 2][clickedSquare->col], &moveableSquares);
                                         }
-                                        
-                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row - 1][clickedSquare->col - 1], &takeableSquares, turn);
-                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row - 1][clickedSquare->col + 1], &takeableSquares, turn);
+                                        int row = clickedSquare->row - 1 < 0 ? 0 : clickedSquare->row -1;
+
+                                        if (clickedSquare->col - 1 > -1)
+                                            MakeTakeableIfOpponent(&Squares[row][clickedSquare->col - 1], &takeableSquares, turn);
+                                        if (clickedSquare->col + 1 < 8)
+                                            MakeTakeableIfOpponent(&Squares[row][clickedSquare->col + 1], &takeableSquares, turn);
                                     }
 
                                     else if (clickedSquare->piece->color == "BLACK")
@@ -175,6 +177,7 @@ int main(int argc, char* argv[])
                                         MakeTakeableIfOpponent(&Squares[clickedSquare->row + 1][clickedSquare->col - 1], &takeableSquares, turn);
                                         MakeTakeableIfOpponent(&Squares[clickedSquare->row + 1][clickedSquare->col + 1], &takeableSquares, turn);
                                     }
+                                    break;
                             }
 
                             for (Square* takeableSquare : takeableSquares)
@@ -187,6 +190,11 @@ int main(int argc, char* argv[])
                             {
                                 moveableSquare->backgroundColor = GREEN;
                                 moveableSquare->Render(renderer);
+                            }
+
+                            if (selectedSquare)
+                            {
+                                DeselectSquare(&takeableSquares, &moveableSquares, renderer, selectedSquare);
                             }
 
                             clickedSquare->backgroundColor = BLUE;
