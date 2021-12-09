@@ -151,32 +151,50 @@ int main(int argc, char* argv[])
                                 case hash("PAWN"):
                                     if (clickedSquare->piece->color == "WHITE")
                                     {
-                                        MakeMoveableIfEmpty(&Squares[clickedSquare->row - 1][clickedSquare->col], &moveableSquares);
-
                                         if (clickedSquare->row == 6)
                                         {
                                             MakeMoveableIfEmpty(&Squares[6 - 2][clickedSquare->col], &moveableSquares);
                                         }
-                                        int row = clickedSquare->row - 1 < 0 ? 0 : clickedSquare->row -1;
 
-                                        if (clickedSquare->col - 1 > -1)
-                                            MakeTakeableIfOpponent(&Squares[row][clickedSquare->col - 1], &takeableSquares, turn);
-                                        if (clickedSquare->col + 1 < 8)
-                                            MakeTakeableIfOpponent(&Squares[row][clickedSquare->col + 1], &takeableSquares, turn);
+                                        int nextRow = clickedSquare->row - 1;
+                                        if (!(nextRow < 0))
+                                        {
+                                            MakeMoveableIfEmpty(&Squares[nextRow][clickedSquare->col], &moveableSquares);
+                                            if (clickedSquare->col - 1 > -1)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col - 1], &takeableSquares, turn);
+                                            if (clickedSquare->col + 1 < 8)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col + 1], &takeableSquares, turn);
+                                        }
                                     }
 
                                     else if (clickedSquare->piece->color == "BLACK")
                                     {
-                                        MakeMoveableIfEmpty(&Squares[clickedSquare->row + 1][clickedSquare->col], &moveableSquares);
-
                                         if (clickedSquare->row == 1)
                                         {
                                             MakeMoveableIfEmpty(&Squares[1 + 2][clickedSquare->col], &moveableSquares);
                                         }
 
-                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row + 1][clickedSquare->col - 1], &takeableSquares, turn);
-                                        MakeTakeableIfOpponent(&Squares[clickedSquare->row + 1][clickedSquare->col + 1], &takeableSquares, turn);
+                                        int nextRow = clickedSquare->row + 1;
+                                        if (!(nextRow > 7))
+                                        {
+                                            MakeMoveableIfEmpty(&Squares[nextRow][clickedSquare->col], &moveableSquares);
+                                            if (clickedSquare->col - 1 > -1)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col - 1], &takeableSquares, turn);
+                                            if (clickedSquare->col + 1 < 8)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col + 1], &takeableSquares, turn);
+                                        }
                                     }
+                                    break;
+
+                                case hash("ROOK"):
+                                    const char* opponent = turn == "WHITE" ? "BLACK" : "WHITE";
+
+                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "row", "inc");
+                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "row", "dec");
+
+                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "col", "inc");
+                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "col", "dec");
+
                                     break;
                             }
 
@@ -231,11 +249,15 @@ int main(int argc, char* argv[])
                             {
                                 if (moveableSquare->row == clickedSquare->row && moveableSquare->col == clickedSquare->col)
                                 {
+                                    // Move the piece
                                     clickedSquare->piece = selectedSquare->piece;
                                     selectedSquare->piece = &EMPTY;                                
+                                    
+                                    // Deselect the old one
                                     DeselectSquare(&takeableSquares, &moveableSquares, renderer, selectedSquare);
-                                    selectedSquare = nullptr;    
+                                    selectedSquare = nullptr;
 
+                                    // Update turn
                                     turn = turn == "WHITE" ? "BLACK" : "WHITE";
                                     break;
                                 }

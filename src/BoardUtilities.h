@@ -59,3 +59,36 @@ void MakeTakeableIfOpponent(Square* square, std::vector<Square*>* takeableSquare
         takeableSquares->push_back(square);
     }
 }
+
+void FindMoveableSquaresForRookOnAnAxis(Square Squares[8][8], Square* clickedSquare, const char* turn, const char* opponent, std::vector<Square*>* takeableSquares, std::vector<Square*>* moveableSquares, const char* axis, const char* incOrDec)
+{
+    int axisInt = axis == "row" ? clickedSquare->row : clickedSquare->col;
+    while (true)
+    {
+        incOrDec == "inc" ? axisInt++ : axisInt--;
+
+        if ( 
+            (incOrDec == "dec" && axisInt < 0 )
+            ||
+            (incOrDec == "inc" && axisInt > 7 ) )
+        {
+            break;
+        }
+
+        Square* temporarySquare = axis == "row" ? &Squares[axisInt][clickedSquare->col] : &Squares[clickedSquare->row][axisInt];
+
+        if (temporarySquare->piece->color == turn)
+        {
+            break;
+        }
+        else if (temporarySquare->piece->type == "EMPTY")
+        {
+            moveableSquares->push_back(temporarySquare);
+        }
+        else if (temporarySquare->piece->color == opponent)
+        {
+            takeableSquares->push_back(temporarySquare);
+            break;
+        }                                        
+    }
+}
