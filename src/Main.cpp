@@ -22,6 +22,7 @@ constexpr unsigned int hash(const char *s, int off = 0) {
     return !s[off] ? 5381 : (hash(s, off+1)*33) ^ s[off];                           
 }
 
+#define KNIGHT_MOVE(ROW, COL) HandleSquareSelectMoveableAndTakeables(&Squares[ROW][COL],  &takeableSquares, &moveableSquares, opponent);
 
 int main(int argc, char* argv[])
 {
@@ -145,6 +146,9 @@ int main(int argc, char* argv[])
                         // Select
                         if (!selectedSquare && clickedSquare->piece->type != "EMPTY" && clickedSquare->piece->color == turn)
                         {
+                            // Get opponent teams color
+                            const char* opponent = turn == "WHITE" ? "BLACK" : "WHITE";
+
                             // Set moveable and takeable squares
                             switch (hash(clickedSquare->piece->type))
                             {
@@ -157,13 +161,13 @@ int main(int argc, char* argv[])
                                         }
 
                                         int nextRow = clickedSquare->row - 1;
-                                        if (!(nextRow < 0))
+                                        if (nextRow >= 0)
                                         {
                                             MakeMoveableIfEmpty(&Squares[nextRow][clickedSquare->col], &moveableSquares);
-                                            if (clickedSquare->col - 1 > -1)
-                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col - 1], &takeableSquares, turn);
-                                            if (clickedSquare->col + 1 < 8)
-                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col + 1], &takeableSquares, turn);
+                                            if (clickedSquare->col - 1 >= 0)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col - 1], &takeableSquares, opponent);
+                                            if (clickedSquare->col + 1 <= 7)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col + 1], &takeableSquares, opponent);
                                         }
                                     }
 
@@ -175,25 +179,58 @@ int main(int argc, char* argv[])
                                         }
 
                                         int nextRow = clickedSquare->row + 1;
-                                        if (!(nextRow > 7))
+                                        if (nextRow <= 7)
                                         {
                                             MakeMoveableIfEmpty(&Squares[nextRow][clickedSquare->col], &moveableSquares);
-                                            if (clickedSquare->col - 1 > -1)
-                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col - 1], &takeableSquares, turn);
-                                            if (clickedSquare->col + 1 < 8)
-                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col + 1], &takeableSquares, turn);
+                                            if (clickedSquare->col - 1 >= 0)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col - 1], &takeableSquares, opponent);
+                                            if (clickedSquare->col + 1 <= 7)
+                                                MakeTakeableIfOpponent(&Squares[nextRow][clickedSquare->col + 1], &takeableSquares, opponent);
                                         }
                                     }
                                     break;
 
                                 case hash("ROOK"):
-                                    const char* opponent = turn == "WHITE" ? "BLACK" : "WHITE";
-
                                     FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "row", "inc");
                                     FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "row", "dec");
 
                                     FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "col", "inc");
                                     FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "col", "dec");
+
+                                    break;
+
+                                case hash("KNIGHT"):
+                                    if ( clickedSquare->col + 2 <= 7 )
+                                    {
+                                        if ( clickedSquare->row + 1 <= 7 )
+                                            KNIGHT_MOVE(clickedSquare->row + 1, clickedSquare->col + 2);
+                                        if ( clickedSquare->row - 1 >= 0 )
+                                            KNIGHT_MOVE(clickedSquare->row - 1, clickedSquare->col + 2);
+                                    }
+
+                                    if ( clickedSquare->col - 2 >= 0)
+                                    {
+                                        if ( clickedSquare->row - 1 >= 0)
+                                            KNIGHT_MOVE(clickedSquare->row - 1, clickedSquare->col - 2);
+                                        if ( clickedSquare->row + 1 <= 7)
+                                            KNIGHT_MOVE(clickedSquare->row + 1,clickedSquare->col - 2);
+                                    }
+
+                                    if ( clickedSquare->row - 2 >= 0 )
+                                    {
+                                        if ( clickedSquare->col + 1 <= 7 )
+                                            KNIGHT_MOVE(clickedSquare->row - 2,clickedSquare->col + 1);
+                                        if ( clickedSquare->col - 1 >= 0 )
+                                            KNIGHT_MOVE(clickedSquare->row - 2, clickedSquare->col - 1);
+                                    }
+
+                                    if (clickedSquare->row + 2 <= 7)
+                                    {
+                                        if (clickedSquare->col + 1 <= 7)
+                                            KNIGHT_MOVE(clickedSquare->row + 2, clickedSquare->col + 1);
+                                        if (clickedSquare->col - 1 >= 0)
+                                            KNIGHT_MOVE(clickedSquare->row + 2, clickedSquare->col - 1);
+                                    }
 
                                     break;
                             }
