@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
     ChessPiece EMPTY(nullptr, "EMPTY", "EMPTY");
 
-    ChessPiece Grid[ROW_COUNT][COL_COUNT] = {
+    ChessPiece DefaultBoard[ROW_COUNT][COL_COUNT] = {
         {   ROOK_BLACK,   KNIGHT_BLACK,  BISHOP_BLACK,  QUEEN_BLACK,  KING_BLACK,  BISHOP_BLACK,  KNIGHT_BLACK,  ROOK_BLACK   },
         {   PAWN_BLACK,   PAWN_BLACK  ,  PAWN_BLACK  ,  PAWN_BLACK ,  PAWN_BLACK,  PAWN_BLACK  ,  PAWN_BLACK  ,  PAWN_BLACK   },
         {   EMPTY     ,   EMPTY       ,  EMPTY       ,  EMPTY      ,  EMPTY     ,  EMPTY       ,  EMPTY       ,  EMPTY        },
@@ -88,37 +88,22 @@ int main(int argc, char* argv[])
         {   PAWN_WHITE,   PAWN_WHITE  ,  PAWN_WHITE  ,  PAWN_WHITE ,  PAWN_WHITE,  PAWN_WHITE  ,  PAWN_WHITE  ,  PAWN_WHITE   },
         {   ROOK_WHITE,   KNIGHT_WHITE,  BISHOP_WHITE,  QUEEN_WHITE,  KING_WHITE,  BISHOP_WHITE,  KNIGHT_WHITE,  ROOK_WHITE   }
     };
-
     Square Squares[ROW_COUNT][COL_COUNT];
 
-    for (int row=0; row<ROW_COUNT; row++)
-    {
-        for (int col=0; col<COL_COUNT; col++)
-        {
-            Square* square = &Squares[row][col];
-            // Set grid position
-            square->SetGridPosition(row, col);
-
-            // Set bg color
-            ResetSquareBg(square);
-
-            // Render
-            square->piece = &Grid[row][col];
-            square->Render(renderer);
-        }
-    }
+    ResetBoard(Squares, DefaultBoard, renderer);
     // ===========================================
-
-
 
     // ===========================================
     // Game loop
 
     SDL_Event evt;
-    
     const char* turn = "WHITE";
+
+    // Ptr to currently selected square
     Square* selectedSquare = nullptr;
+    // moveable squares of selected square
     std::vector<Square*> moveableSquares;
+    // takeable squares of selected square
     std::vector<Square*> takeableSquares;
 
     while (true)
@@ -191,12 +176,7 @@ int main(int argc, char* argv[])
                                     break;
 
                                 case hash("ROOK"):
-                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "row", "inc");
-                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "row", "dec");
-
-                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "col", "inc");
-                                    FindMoveableSquaresForRookOnAnAxis(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, "col", "dec");
-
+                                    SelectRook(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, false);
                                     break;
 
                                 case hash("KNIGHT"):
@@ -232,6 +212,20 @@ int main(int argc, char* argv[])
                                             KNIGHT_MOVE(clickedSquare->row + 2, clickedSquare->col - 1);
                                     }
 
+                                    break;
+
+                                case hash("BISHOP"):
+                                    SelectBishop(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, false);
+                                    break;
+
+                                case hash("QUEEN"):
+                                    SelectRook(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, false);
+                                    SelectBishop(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, false);
+                                    break;
+
+                                case hash("KING"):
+                                    SelectRook(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, true);
+                                    SelectBishop(Squares, clickedSquare, turn, opponent, &takeableSquares, &moveableSquares, true);
                                     break;
                             }
 
