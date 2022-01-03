@@ -1,0 +1,3 @@
+[submodule "SDL_GUI"]
+	path = SDL_GUI
+	url = https://github.com/AlperBayraktar/SDL-GUI
