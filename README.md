@@ -9,5 +9,5 @@ git clone https://github.com/AlperBayraktar/Chess.git
 cd Chess
 cd build
 # open Makefile and set variables according to comments, then:
-make Compile
+make Build
 ```
