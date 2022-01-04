@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Square.h"
-#include "Colors.h"
+#include "ChessColors.h"
 #include <SDL.h>
 
 // Resets given square's bg
@@ -11,11 +11,11 @@ void ResetSquareBg(Square* square)
 {
     if ((square->row % 2 == 0 && square->col % 2 == 0) || (square->row % 2 == 1 && square->col % 2 == 1))
     {
-        square->backgroundColor = WHITE;
+        square->backgroundColor = CHESS_WHITE;
     }
     else 
     {
-        square->backgroundColor = BLACK;
+        square->backgroundColor = CHESS_BLACK;
     }
 }
 

@@ -8,9 +8,20 @@
         // Folder that contains SDL.h
         "C:/cpp/SDL2-2.0.16/x86_64-w64-mingw32/include/SDL2",
         // Folder that contains SDL_image.h
-        "C:/cpp/SDL2_image-2.0.5/x86_64-w64-mingw32/include/SDL2"
+        "C:/cpp/SDL2_image-2.0.5/x86_64-w64-mingw32/include/SDL2",
+        // Folder that contains SDL_ttf.h
+        "C:/cpp/SDL2_ttf-2.0.15/x86/include/SDL2",
+        // Folder that contains SDL_GUI.h (my gui library),
+        "${workspaceFolder}/SDL_GUI/include"
       ],
-      "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+      "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE",
+        // To avoid vscode errors
+        "CLICK_EXE",
+        "CMD"
+      ],
       "windowsSdkVersion": "10.0.19041.0",
       "compilerPath": "C:/MinGW/bin/g++.exe",
       "cStandard": "c17",
