@@ -1,4 +1,4 @@
-# Chess
+# Chess (Not Finished but Close to Finishing)
 
 A chess game created with C++ and SDL2 library. I used my "library" called "SDL_GUI" for game menu.
 I stopped developing this game because of my High School Entry Exam (LGS).
